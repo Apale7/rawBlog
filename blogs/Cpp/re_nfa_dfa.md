@@ -1,6 +1,6 @@
 ---
 title: 正则表达式-＞NFA-＞DFA(C++实现)
-date: 2020-10-1
+date: 2020-10-01
 tags:
  - 编译原理
 categories:
