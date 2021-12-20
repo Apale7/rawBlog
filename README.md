@@ -1,7 +1,7 @@
 ---
 home: true
 heroText: Apale的个人博客
-tagline: 一个蒟蒻后端的知识手册
+tagline: 一个后端萌新的知识手册
 # heroImage: /hero.png
 # heroImageStyle: {
 #   maxWidth: '600px',

@@ -46,7 +46,7 @@ module.exports = {
         "icon": "reco-message",
         "items": [
           {
-            "text": "GitHub",
+            "text": "Apale7",
             "link": "https://github.com/Apale7",
             "icon": "reco-github"
           }
