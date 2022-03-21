@@ -92,7 +92,7 @@ module.exports = {
     "lastUpdated": "Last Updated",
     "author": "Apale",
     "authorAvatar": "/avatar.jpg",
-    "record": "xxxx",
+    "record": "1234",
     "startYear": "2017"
   },
   "markdown": {

@@ -1,4 +1,5 @@
-# npm run build
+npm run build
+python3 deploy.py
 SERVER_PATH="apale@apale7.cn:/home/apale/blog/blog"
 scp -r public $SERVER_PATH #拷贝到服务器
 cd public
