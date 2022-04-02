@@ -4,10 +4,12 @@ module.exports = {
   "dest": "public",
   "head": [
     ['link', { rel: 'stylesheet', href: 'https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.css' }],
-    ['link', { rel: 'stylesheet', href: 'https://gitcdn.xyz/cdn/goessner/markdown-it-texmath/master/texmath.css' }],
-    ['script', { src: 'https://github.com/markdown-it/markdown-it/blob/master/bin/markdown-it.js' }],
-    ['script', { src: 'https://gitcdn.xyz/cdn/goessner/markdown-it-texmath/master/texmath.js' }],
+    ['link', { rel: 'stylesheet', href: 'https://cdn.jsdelivr.net/npm/markdown-it-texmath@0.9.7/css/texmath.css' }],
+    ['script', { src: 'https://cdn.jsdelivr.net/npm/markdown-it@12.3.2/bin/markdown-it.js' }],
+    ['script', { src: 'https://cdn.jsdelivr.net/npm/markdown-it-texmath@0.9.7/texmath.js' }],
     ['script', { src: 'https://cdn.jsdelivr.net/npm/katex@0.15.1/dist/katex.min.js' }],
+    // ['script', { src: 'https://lf6-cdn-tos.bytecdntp.com/cdn/expire-1-M/KaTeX/0.15.1/katex.min.css' }],
+
     [
       "link",
       {
