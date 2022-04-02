@@ -10,5 +10,8 @@
     "vuepress": "1.8.2",
     "vuepress-theme-reco": "1.6.6"
   },
-  "description": "blog build by VuePress"
+  "description": "blog build by VuePress",
+  "dependencies": {
+    "markdown-it-texmath": "^0.9.7"
+  }
 }
