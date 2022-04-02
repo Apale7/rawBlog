@@ -1,0 +1,130 @@
+---
+title: HDU6315 Naive Operations (2018多校第二场) 线段树
+date: 2018-07-26
+tags:
+ - 
+
+categories:
+ - 数据结构
+
+---
+
+题目链接: [hdu6315](http://acm.hdu.edu.cn/showproblem.php?pid=6315)
+题目大意: 输入一个n，下一行输入一个长度为n的数组b，b是1到n的一种全排列，还有一个长度为n初值全为0的数组a
+				两种操作: 1) 输入add l r ,将$a_l$到$a_r$的数字全都 +1
+								2) 输入 query l r，查询 $\sum_{i=l}^r $ $ \dfrac{a_i}{b_i} $，$ \dfrac{a_i}{b_i} $的值向下取整
+思路: 因为$ \dfrac{a_i}{b_i} $的值向下取整，当一个区间内a的最大值比该区间b的最小值还要小，那么这个区间对答案的贡
+		 献一定是0。用线段树维护三个值: 区间中a的最小值，b的最大值，区间中的$\sum \dfrac{a_i}{b_i} $		
+		 当a的增加并没有使max(a) > min(b)时，用lazy标记记录a的增加，而不更新到下面的结点
+		 当a的增加时区间中的max(a)>=min(b)时，一路更新到那些max(a)>=min(b)的叶子结点，把叶子的minb[rt] += b[l]，
+		 并把这片叶子对答案的贡献＋1
+跑得很慢的代码:
+
+```
+#include<bits/stdc++.h>
+using namespace std;
+const int maxn = 1e5 + 10;
+int b[maxn],n,q;
+
+#define lson l,m,rt<<1
+#define rson m+1,r,rt<<1|1
+int mb[maxn<<2],ma[maxn<<2],lazy[maxn<<2],tot[maxn<<2];
+
+void pushup(int rt)
+{
+	mb[rt] = min(mb[rt<<1],mb[rt<<1|1]);
+	ma[rt] = max(ma[rt<<1],ma[rt<<1|1]);
+	tot[rt] = tot[rt<<1] + tot[rt<<1|1];
+}
+
+void pushdown(int rt)
+{
+	if(lazy[rt])
+	{
+		lazy[rt<<1] += lazy[rt];
+		lazy[rt<<1|1] += lazy[rt];
+		ma[rt<<1] += lazy[rt];
+		ma[rt<<1|1] += lazy[rt];
+		lazy[rt] = 0;
+	}
+}
+
+void build(int l,int r,int rt)
+{
+	lazy[rt] = 0;
+	tot[rt] = 0;
+	if(l==r)
+	{
+		mb[rt] = b[l];
+		ma[rt] = 0;
+		return ;
+	}
+	int m = l + r >> 1;
+	build(lson);
+	build(rson);
+	pushup(rt);
+}
+
+//tot数组表示区间中a/b在取整求和时的贡献，初值为0
+//因为向下取整，所以a<b时贡献是0。当a>=b时，该区间的tot值加一
+//同时该区间的b值也+1，当a再次达到b时，tot再+1 
+//(例如1/1的贡献是1，此时把tot+=1,分母+=1，下次a达到2的时候,2/2又使得tot+=1。。。。) 
+void update(int L,int R,int l,int r,int rt)
+{
+	if(L<=l&&r<=R)
+	{
+		++ma[rt];
+		if(ma[rt]>=mb[rt]&&l==r)//a增加后超过了b，a/b取整求和的时候不为0了 
+		{
+			++tot[rt];
+			mb[rt] += b[l]; 
+			return ;
+		}
+		if(ma[rt]<mb[rt])//该区间的a虽然增加了，但比b小，a/b取整求和的时候为0，用lazy记下来即可 
+		{
+			++lazy[rt];
+			return ;
+		}
+	}
+	int m = l + r >> 1;
+	pushdown(rt);
+	if(L<=m)
+		update(L,R,lson);
+	if(R>m)
+		update(L,R,rson);
+	pushup(rt);
+}
+
+int query(int L,int R,int l,int r,int rt)
+{
+	if(L<=l&&r<=R)
+		return tot[rt];
+	int m = l + r >> 1,ans = 0;
+	if(L<=m)
+		ans += query(L,R,lson);
+	if(R>m)
+		ans += query(L,R,rson);
+	return ans;
+}
+
+char op[10];
+int l, r;
+int main()
+{
+	scanf("%d%d",&n,&q);
+	for(int i=1;i<=n;++i)
+		scanf("%d",&b[i]);
+	build(1,n,1);
+	while(q--)
+	{
+		scanf("%s%d%d",op,&l,&r);
+		if(op[0]=='a')
+			update(l,r,1,n,1);
+		else
+			printf("%d\n",query(l,r,1,n,1));
+	}
+	return 0;
+}
+```
+
+		           	

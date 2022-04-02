@@ -1,0 +1,134 @@
+---
+title: 倍增法求LCA(最近公共祖先)
+date: 2018-07-14
+tags:
+ - 
+
+categories:
+ - 图算法
+
+---
+
+实在太蠢了搞不定ST表o(╥﹏╥)o，只能学个倍增法了。
+
+讲倍增法前先看看暴力法。
+第一步肯定是dfs求每个点的深度。
+查询lca(a,b)时，先把ab中深度较大的点往上移，移到两个点深度相同为止；
+现在两个点深度相同了，于是两个点一起往上移，直至移到同一个位置，即最近公共祖先。
+
+倍增法其实就是在暴力的基础上，对把两个点上移的过程进行倍增操作(因为一步一步走真的很慢啊)
+
+倍增操作即：如果向上移动 $2^i$ 步后，两个点的位置仍不相同，则把两个点直接往上移 $2^i$ 步
+					  (为什么两个点的位置不能相同？因为相同的话大概率就跑过头了啊)
+					  i从树的最大深度开始递减，这样往上走，最终两个点会相聚在最近公共祖先，或差一步到达最近公共祖先
+					  操作的过程中需要预处理的量:
+						  fa[ ]数组，fa[v] = u表示v的父节点为u
+						  anc[ ][ ]数组，anc[i][j] = k表示节点 i 往上走 $2^j$ 步会走到节点k
+						  in[ ],out[ ]，dfs序的入出时间戳(特判会用到，见代码注释)
+						  deep[ ]数组，deep[u]=d表示节点u的深度为d
+						  树的最大深度m,可以默认20，也可以根据输入的N算一下
+
+anc的求法:
+	显然anc[i][0] = fa[i]
+	容易得到，i向上走 $2^j$ 步的位置与i先向上走 $2^{j-1}$ 步，再向上走 $2^{j-1}$ 步是一样的，
+	即: anc[i][j] = anc[anc[i][j-1]][j-1]
+
+模板题poj1330的代码:
+
+```
+#include<cstdio>
+#include<cstring>
+#include<cmath>
+#include<algorithm>
+using namespace std;
+
+const int maxn = 10010;
+
+struct edge
+{
+    int to,next;
+}e[maxn<<1];
+int head[maxn<<1],cnt,fa[maxn],anc[maxn][20],in[maxn],out[maxn],tot,m;
+void add(int u,int v)
+{
+    e[tot].next = head[u];
+    e[tot].to = v;
+    head[u] = tot++;
+}
+
+void init(int N)
+{
+    m = ceil(log(N+0.0)/log(2.0));
+    cnt = 0;
+    memset(head,-1,8*N);
+    memset(fa,0,4*N);
+    memset(anc,0,80*N);
+    tot = 0;
+}
+
+int deep[maxn],maxdeep;
+void dfs(int u,int pre,int d)
+{
+    in[u] = ++cnt;
+    deep[u] = d;
+    anc[u][0] = fa[u];
+    for(int i=1;i<=m;++i)
+    {
+        anc[u][i] = anc[anc[u][i-1]][i-1];
+        if(!anc[u][i])
+            break;
+    }
+    for(int i=head[u];~i;i=e[i].next)
+    {
+        int v = e[i].to;
+        if(v == pre)
+            continue;
+        dfs(v,u,d+1);
+    }
+    out[u] = cnt;
+}
+
+int lca(int a,int b)
+{
+    if(deep[a]>deep[b])//保证a在上面
+        swap(a,b);
+    if(in[a]<=in[b]&&out[b]<=out[a])//在dfs序中，a夹着b，即b在a的子树中，
+        return a;                   //最近公共祖先显然是a
+    for(int i=m;~i;--i)
+        if(deep[a]<deep[b]&&deep[a]<=deep[anc[b][i]])
+            b = anc[b][i];//上移至深度相同，也可以倍增
+    for(int i=m;~i;--i)
+    {
+        if(anc[a][i]!=anc[b][i])
+            a = anc[a][i],b = anc[b][i];
+    }
+    return anc[a][0];
+}
+
+int T,N,u,v,rt,a,b;
+int main()
+{
+    scanf("%d",&T);
+    while(T--)
+    {
+        scanf("%d",&N);
+        init(N);
+        for(int i=1;i<N;++i)
+        {
+            scanf("%d%d",&u,&v);
+            add(u,v);
+            add(v,u);
+            fa[v] = u;
+        }
+        rt = 1;
+        while(fa[rt]) ++rt;
+        dfs(rt,rt,1);
+        scanf("%d%d",&a,&b);
+        printf("%d\n",lca(a,b));
+    }
+    return 0;
+}
+//(PS:单论这题的最优解法应该是暴力，因为只有一组查询。。。)
+```
+
+ 						  

@@ -1,0 +1,123 @@
+---
+title: CodeForces - 404C Restore Graph
+date: 2018-11-19
+tags:
+ - 
+
+categories:
+ - ACM水题
+
+---
+
+Valera had an undirected connected graph without self-loops and multiple edges consisting of n vertices. The graph had an interesting property: there were at most k edges adjacent to each of its vertices. For convenience, we will assume that the graph vertices were indexed by integers from 1 to n.
+
+One day Valera counted the shortest distances from one of the graph vertices to all other ones and wrote them out in array d. Thus, element d[i] of the array shows the shortest distance from the vertex Valera chose to vertex number i.
+
+Then something irreparable terrible happened. Valera lost the initial graph. However, he still has the array d. Help him restore the lost graph.
+
+Input
+The first line contains two space-separated integers n and k (1 ≤ k < n ≤ 105). Number n shows the number of vertices in the original graph. Number k shows that at most k edges were adjacent to each vertex in the original graph.
+
+The second line contains space-separated integers d[1], d[2], ..., d[n] (0 ≤ d[i] < n). Number d[i] shows the shortest distance from the vertex Valera chose to the vertex number i.
+
+Output
+If Valera made a mistake in his notes and the required graph doesn't exist, print in the first line number -1. Otherwise, in the first line print integer m (0 ≤ m ≤ 106) — the number of edges in the found graph.
+
+In each of the next m lines print two space-separated integers ai and bi (1 ≤ ai, bi ≤ n; ai ≠ bi), denoting the edge that connects vertices with numbers ai and bi. The graph shouldn't contain self-loops and multiple edges. If there are multiple possible answers, print any of them.
+
+Examples
+Input
+3 2
+0 1 1
+Output
+3
+1 2
+1 3
+3 2
+Input
+4 2
+2 0 1 3
+Output
+3
+1 3
+1 4
+2 3
+Input
+3 1
+0 0 0
+Output
+-1
+
+题意：有一幅$n$个点的无向无环图(那不就是树吗=_=)，边权全为$1$，现在只知道其中一个点到其他每个点的最短距离(与自己的距离是$0$)和每个点的最大度数$k$，请判断这样的图是否存在。存在则输出边数和每一条边，否则输出$-1$。
+
+思路：把距离按升序排序，然后当做是一棵k叉树，一层一层连边。如果第$i$层所有的点的度数都到$k$了而第$i+1$层还有剩余的点，就输出$-1$
+数据好坑啊，居然有一个点卡的是输入的距离没有$0$要输出$-1$
+
+```
+#include <cstdio>
+#include <algorithm>
+#include <vector>
+#include <queue>
+
+using namespace std;
+
+const int maxn = 100005;
+int n, k;
+int degree[maxn];
+vector<pair<int,int> > G;
+struct node
+{
+    int val, id;
+
+    bool operator<(const node &a) const
+    {
+        return val < a.val;
+    }
+} d[maxn];
+
+int main()
+{
+    bool flag = 0;
+    scanf("%d%d", &n, &k);
+    for (int i = 1; i <= n; ++i)
+    {
+        scanf("%d", &d[i].val);
+        d[i].id = i;
+    }
+
+    sort(d + 1, d + n + 1);
+
+    if ((!d[1].val && !d[2].val) || d[1].val)//0的数量不为1时直接输出-1
+    {
+        printf("-1\n");
+        return 0;
+    }
+    int fa = 1;
+    for (int i = 2; i <= n; ++i)
+    {
+        while (d[i].val > d[fa].val + 1)
+            ++fa;
+        if (degree[d[fa].id] == k)
+            ++fa;
+        if (d[i].val != d[fa].val + 1)
+        {
+            flag = 1;
+            break;
+        }
+        G.emplace_back(make_pair(d[fa].id,d[i].id));
+        ++degree[d[fa].id];
+        ++degree[d[i].id];
+    }
+    if (flag)
+        printf("-1\n");
+    else
+    {
+        printf("%d\n",(int)G.size());
+        for (auto i:G)
+            printf("%d %d\n",i.first,i.second);
+    }
+    return 0;
+}
+```
+
+

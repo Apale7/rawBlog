@@ -1,0 +1,173 @@
+---
+title: poj 3468 (splay)
+date: 2018-08-27
+tags:
+ - 
+
+categories:
+ - 数据结构
+
+---
+
+最近在学splay，就用这道题来记一下模板。
+
+splay是二叉搜索树，满足中序遍历有序的性质；同时，splay操作可以在不改变中序序列的前提下改变树的结构。因此，splay可以十分方便地维护区间信息。
+
+```
+#include<cstdio>
+using namespace std;
+
+const int maxn = 1e5 + 5;
+typedef long long ll;
+
+int fa[maxn], ch[maxn][2], val[maxn], siz[maxn];
+ll sum[maxn], lazy[maxn];
+int a[maxn];
+
+int tot, root, N, Q;
+#define rrt ch[root][1]
+#define ls ch[rt][0]
+#define rs ch[rt][1]
+bool get(int x)
+{
+    return ch[fa[x]][1] == x;
+}
+
+void connect(int x,int f,int which)
+{
+    fa[x] = f;
+    ch[f][which] = x;
+}
+
+void pushup(int rt)
+{
+    siz[rt] = siz[ls] + siz[rs] + 1;
+    sum[rt] = sum[ls] + sum[rs] + val[rt];
+}
+
+void pushdown(int rt)
+{
+    if(lazy[rt])
+    {
+        lazy[ls] += lazy[rt];
+        lazy[rs] += lazy[rt];
+        sum[ls] += (ll)siz[ls] * lazy[rt];
+        sum[rs] += (ll)siz[rs] * lazy[rt];
+        val[rt] += lazy[rt];
+        lazy[rt] = 0;
+    }
+}
+
+int y,z,yson,zson,xson;
+void rotate(int x)
+{
+    y = fa[x];
+    z = fa[y];
+    pushdown(y);
+    pushdown(x);
+    yson = get(x);
+    zson = get(y);
+    xson = ch[x][yson^1];
+    if(z) connect(x,z,zson);
+    fa[x] = z;
+    connect(y,x,yson^1);
+    connect(xson,y,yson);
+    pushup(y);
+}
+
+void splay(int x,int to)//把x移动到to的下面
+{
+    pushdown(x);
+    while(fa[x] != to)
+    {
+        if(fa[fa[x]] == to) rotate(x);
+        else if(get(x) == get(fa[x])) rotate(fa[x]), rotate(x);//三点共线
+        else rotate(x), rotate(x);
+    }
+    pushup(x);
+    if(to == 0)//x移动到根了
+        root = x;//更新根
+}
+
+void newnode(int &x,int v,int f)
+{
+    x = ++tot;
+    ch[x][0] = ch[x][1]  = lazy[x] = 0;
+    siz[x] = 1;
+    sum[x] = v;
+    fa[x] = f;
+    val[x] = v;
+}
+
+void build(int &rt,int l,int r,int f)
+{
+    if(l>r) return ;
+    int m = l + r >> 1;
+    newnode(rt,a[m],f);
+    build(ls,l,m-1,rt);
+    build(rs,m+1,r,rt);
+    pushup(rt);
+}
+
+void initbuild()
+{
+    root = tot = 0;
+    ch[0][0] = ch[0][1] = siz[0] = sum[0] = lazy[0] = fa[0] = val[0] = 0;
+    newnode(root,0,0);//0
+    newnode(rrt,0,root);//N+1
+    for(int i=1;i<=N;++i)
+		scanf("%d",&a[i]);
+    build(ch[rrt][0],1,N,rrt);
+    pushup(rrt);
+    pushup(root);
+}
+
+int get_kth(int rt,int k)
+{
+    pushdown(rt);
+    int temp = siz[ls] + 1;
+    if(temp == k) return rt;
+    if(temp > k) return get_kth(ls,k);
+    return get_kth(rs,k-temp);
+}
+
+void update(int l,int r,int v)
+{
+    splay(get_kth(root,l),0);//因为加了虚节点0(占了下标1)，实际区间的下标为2到N+1
+    splay(get_kth(root,r+2),root);//所以区间中的第l-1个元素就是树上的第l个点
+
+    lazy[ch[rrt][0]] += v;
+    sum[ch[rrt][0]] += ll(v * siz[ch[rrt][0]]);
+    pushup(root);
+    pushup(rrt);
+}
+
+ll query(int l,int r)
+{
+    splay(get_kth(root,l),0);
+    splay(get_kth(root,r+2),root);
+
+    return sum[ch[rrt][0]];
+}
+
+int main()
+{
+	char op[2];
+	int l, r, v;
+	scanf("%d%d",&N,&Q);
+	initbuild();
+	while(Q--)
+	{
+		scanf("%s%d%d",op,&l,&r);
+		if(op[0]=='C')
+		{
+			scanf("%d",&v);
+			update(l,r,v);
+		}
+		else
+			printf("%lld\n",query(l,r));
+	}
+	return 0;
+}
+
+```

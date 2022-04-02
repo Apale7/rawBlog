@@ -1,0 +1,129 @@
+---
+title: HDU3974 Assign the task(dfs序+线段树)
+date: 2018-07-09
+tags:
+ - 
+
+categories:
+ - 数据结构
+
+---
+
+老板与员工之间是树形关系。每次给一个员工下达任务就是修改这个员工为根的子树。
+用dfs序把每一棵子树转化成一个区间，用线段树维护，T就是区间更新维护lazy，C就是单点查询。
+```
+#include <bits/stdc++.h>
+using namespace std;
+const int maxn = 50005;
+int T,N,M,u,v,L[maxn<<2],R[maxn<<2],cnt,task[maxn<<2];
+vector<int> boss[maxn];
+int emp[maxn];
+void init()
+{
+    memset(emp,0,sizeof(emp));
+    for(int i=0;i<=N;++i)
+    {
+		boss[i].clear();
+	}
+    cnt = 0;
+}
+
+void dfs(int u)
+{
+    L[u] = ++cnt;
+    int len = boss[u].size();
+    for(int i=0;i<len;++i)
+    {
+        dfs(boss[u][i]);
+    }
+    R[u] = cnt;
+}
+
+void build(int l,int r,int rt)
+{
+    task[rt] = -1;
+    if(l==r)
+        return ;
+    int m = l + r>>1;
+    build(l,m,rt<<1);
+    build(m+1,r,rt<<1|1);
+}
+
+void pushdown(int rt)
+{
+    if(~task[rt])
+    {
+        task[rt<<1] = task[rt<<1|1] = task[rt];
+        task[rt] = -1;
+    }
+}
+
+void update(int L,int R,int C,int l,int r,int rt)
+{
+    if(L<=l&&r<=R)
+    {
+        task[rt] = C;
+        return ;
+    }
+    int m = l + r>>1;
+    pushdown(rt);
+    if(L<=m)
+        update(L,R,C,l,m,rt<<1);
+    if(R>m)
+        update(L,R,C,m+1,r,rt<<1|1);
+}
+
+int query(int p,int l,int r,int rt)
+{
+    if(l==r)
+        return task[rt];
+    pushdown(rt);
+    int m = l + r>>1;
+    if(p<=m)
+        return query(p,l,m,rt<<1);
+    else
+        return query(p,m+1,r,rt<<1|1);
+}
+char op[2];
+int x,y;
+int main()
+{
+    int cas = 1;
+    scanf("%d",&T);
+    while(T--)
+    {
+        init();
+        scanf("%d",&N);
+        for(int i=1;i<N;++i)
+        {
+            scanf("%d%d",&u,&v);
+            emp[u] = 1;
+            boss[v].push_back(u);
+        }
+        for(int i=1;i<=N;++i)
+            if(!emp[i])//不是任何人的员工，即老板(树根)
+            {
+                dfs(i);
+                break;
+            }
+        build(1,cnt,1);
+        scanf("%d",&M);
+        printf("Case #%d:\n",cas++);
+        while(M--)
+        {
+            scanf("%s",op);
+            if(op[0]=='C')
+            {
+                scanf("%d",&x);
+                printf("%d\n",query(L[x],1,cnt,1));
+            }
+            else
+            {
+                scanf("%d%d",&x,&y);
+                update(L[x],R[x],y,1,cnt,1);
+            }
+        }
+    }
+    return 0;
+}
+```

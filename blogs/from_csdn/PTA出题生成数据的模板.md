@@ -1,0 +1,58 @@
+---
+title: PTA出题生成数据的模板
+date: 2018-10-17
+tags:
+ - 
+
+categories:
+ - 杂
+
+---
+
+这学期当助教，得在PTA出题目。用这份模板通过ac代码生成数据。
+
+```
+#include <iostream>
+#include <cstdio>
+#include <cstring>
+using namespace std;
+
+char n[16];
+int ans;
+int main()
+{
+	#ifdef LOCAL
+	freopen("F:\\data\\题目\\data.txt","r",stdin);//用data.txt存放所有的输入数据 
+	char in[] = "F:\\data\\题目\\0.in";//数据的输入 
+	char out[] = "F:\\data\\提米\\0.out";//数据的输出 
+	int I = strlen(in) - 4;//用来修改字符串 
+	int O = strlen(out) - 5;
+	#endif
+	while(cin >> n)
+	{
+		#ifdef LOCAL
+		freopen(in,"w",stdout);//重定向样例的输入数据 
+		cout << n << endl; 
+		fclose(stdout);
+		in[I]++;//改字符串，下次输出到新的文件中 
+		#endif
+		ans = 0;
+		int len = strlen(n);
+		for(int i=0;i<len;++i)
+		{
+			ans *= 2;
+			ans += n[i] - '0';
+		}
+		#ifdef LOCAL
+		freopen(out,"w",stdout);//重定向样例的输出数据 
+		cout << ans << endl;
+		fclose(stdout);
+		out[O]++;//改字符串，下次输出到新的文件中 
+		#endif
+	}
+	return 0;
+}
+```
+比较简陋，只能出十组数据。
+
+

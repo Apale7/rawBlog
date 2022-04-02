@@ -1,0 +1,123 @@
+---
+title: HDU6356 Glad You Came(线段树区间更新+剪枝)
+date: 2018-08-09
+tags:
+ - 
+
+categories:
+ - 数据结构
+
+---
+
+题意: 有一个长度为n的数组a，初值均为0，有m组修改，由题目给的一个随机函数生成l, r, v，把a在区间 [ l , r ] 中小于v的值修改为v，最终输出 $\bigoplus_{i=1}^n$ $a_i$*$i$    (对$a_1$到$a_n$求异或和)
+
+思路: 先把l r v全都弄出来，维护每个区间a的最大值和最小值。
+在update的时候，如果mina >= v，不用更新，直接return了；如果maxa <= v，直接更新区间，打上懒惰标记；否则继续分割区间，向下更新。
+
+```
+#include<bits/stdc++.h>
+using namespace std;
+typedef unsigned int ui;
+typedef long long ll;
+const int maxn = 1e5 + 5;
+const int maxm = 5e6 + 5;
+const ui mod = 1 << 30;
+ui x, y, z, w, f[3*maxm], Left[maxm], Right[maxm], v[maxm];
+ui fun()
+{
+    x ^= (x << 11);
+    x ^= (x >> 4);
+    x ^= (x << 5);
+    x ^= (x >> 14);
+    w = x ^ (y ^ z);
+    x = y;
+    y = z;
+    z = w;
+    return z;
+}
+
+ll ans, a[maxn], maxa[maxn<<2], mina[maxn<<2], lazy[maxn<<2];
+#define lson l,m,rt<<1
+#define rson m+1,r,rt<<1|1
+#define getm int m = l + r >> 1
+void pushup(int rt)
+{
+    mina[rt] = min(mina[rt<<1],mina[rt<<1|1]);
+    maxa[rt] = max(maxa[rt<<1],maxa[rt<<1|1]);
+}
+
+void pushdown(int rt)
+{
+    if(lazy[rt])
+    {
+        lazy[rt<<1] = lazy[rt<<1|1] = lazy[rt];
+        maxa[rt<<1] = maxa[rt<<1|1] = lazy[rt];
+        mina[rt<<1] = mina[rt<<1|1] = lazy[rt];
+        lazy[rt] = 0;
+    }
+}
+
+void update(ui L,ui R,ui val,int l,int r,int rt)
+{
+    if(mina[rt] >= val) return ;//最小值都比v大，不用更新
+    if(L <= l && r <= R)
+    {
+        if(maxa[rt] <= val)//最大值比v小，全部更新，打标记
+        {
+            maxa[rt] = val;
+            lazy[rt] = val;
+            return ;
+        }
+        //否则继续切分区间，向下更新
+    }
+
+    getm;
+    pushdown(rt);
+    if(L<=m)
+        update(L,R,val,lson);
+    if(R>m)
+        update(L,R,val,rson);
+    pushup(rt);
+}
+
+ll query(int pos,int l,int r,int rt)
+{
+    if(l==r)
+        return maxa[rt];
+    getm;
+    pushdown(rt);
+    if(pos<=m)
+        return query(pos,lson);
+    else
+        return query(pos,rson);
+}
+
+int T, N, M;
+int main()
+{
+    scanf("%d",&T);
+    while(T--)
+    {
+        memset(a,0,8*(N+1));
+        memset(lazy,0,32*(N+1));
+        memset(mina,0,32*(N+1));
+        memset(maxa,0,32*(N+1));
+        scanf("%d%d%u%u%u",&N,&M,&x,&y,&z);
+        for(int i=1;i<=3*M;++i)
+            f[i] = fun();
+        for(int i=1;i<=M;++i)
+        {
+            Left[i] = min(f[3*i-2] % N, f[3*i-1] % N) + 1;
+            Right[i] = max(f[3*i-2] % N, f[3*i-1] % N) + 1;
+            v[i] = f[3*i] % mod;
+            update(Left[i],Right[i],v[i],1,N,1);
+        }
+        ans = 0;
+        for(int i=1;i<=N;++i)
+            ans ^= ((ll)i * query(i,1,N,1));
+        printf("%lld\n",ans);
+    }
+    return 0;
+}
+
+```
