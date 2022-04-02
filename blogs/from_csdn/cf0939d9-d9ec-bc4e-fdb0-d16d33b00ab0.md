@@ -9,7 +9,7 @@ categories:
 
 ---
 
-```
+```cpp
 #include<stdio.h>
 #include<cstring>
 #include<iostream>

@@ -13,7 +13,7 @@ categories:
 
 思路：设$dp[u]$是在以$u$为根的树选一棵子树能取到的最大价值。$dp[u]$要么是整棵树的权值之和$sum[u]$，要么是$dp[v]$中的最大值($v$是$u$的孩子)。而答案显然是某一个节点的价值最大的子树与价值次大的子树的价值之和。$dp$ $sum$两个数组一边$dfs$一边维护即可
 
-```
+```cpp
 #include <iostream>
 #include <vector>
 #include <algorithm>

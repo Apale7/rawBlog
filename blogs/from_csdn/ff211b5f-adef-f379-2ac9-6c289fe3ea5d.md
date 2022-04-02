@@ -25,7 +25,7 @@ $2^{64}$也不用模的，用unsigned long long直接自然溢出就好了...
 pushdown的时候要想清楚乘和加的先后，
 每次初始化一定要根据n来。 全初始化T成智障...
 
-```
+```cpp
 #include <cstdio>
 #include <vector>
 #include <algorithm>
