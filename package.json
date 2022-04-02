@@ -12,6 +12,7 @@
   },
   "description": "blog build by VuePress",
   "dependencies": {
+    "katex": "^0.15.3",
     "markdown-it-texmath": "^0.9.7"
   }
 }
